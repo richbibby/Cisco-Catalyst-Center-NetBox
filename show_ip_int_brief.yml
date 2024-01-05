@@ -1,0 +1,29 @@
+---
+- name: Make API Call to Cisco DevNet Sandbox
+  hosts: sw1
+  gather_facts: no
+  vars:
+    username: "devnetuser"
+    password: "Cisco123!"
+
+  tasks:
+    - name: Set Custom Fields as Facts
+      set_fact:
+        cisco_catalyst_center: "{{ hostvars[inventory_hostname].custom_fields['cisco_catalyst_center'] }}"
+        ccc_device_id: "{{ hostvars[inventory_hostname].custom_fields['ccc_device_id'] }}"
+
+    - name: Run 'show ip interface brief' Command
+      cisco.dnac.command_runner_run_command:
+        dnac_host: "{{ cisco_catalyst_center }}"
+        dnac_username: "{{ username }}"
+        dnac_password: "{{ password }}"
+        dnac_verify: False 
+        deviceUuids: 
+          - "{{ ccc_device_id }}"
+        commands: 
+          - "show ip interface brief"
+      register: command_output
+
+    - name: Display Command Output
+      debug:
+        var: command_output
